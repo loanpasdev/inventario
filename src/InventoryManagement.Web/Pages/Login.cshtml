@@ -1,0 +1,75 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<section class="im-login-page">
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-md-7 col-lg-6 col-xl-5">
+                <div class="card im-card im-login-card">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="im-login-hero text-center mb-4">
+                            <div class="im-login-title">Gestión de Inventario</div>
+                            <h1 class="h3 mt-3 mb-0">Iniciar sesión</h1>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+                        {
+                            <div class="alert alert-info" role="alert">
+                                @Model.StatusMessage
+                            </div>
+                        }
+
+                        <form method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Input.Email" class="form-label"></label>
+                                <input asp-for="Input.Email" class="form-control" autocomplete="email" />
+                                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Input.Password" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" data-password-input />
+                                    <button type="button"
+                                            class="btn btn-light border im-password-toggle"
+                                            data-password-toggle
+                                            data-show-label="Mostrar contraseña"
+                                            data-hide-label="Ocultar contraseña"
+                                            title="Mostrar contraseña"
+                                            aria-label="Mostrar contraseña">
+                                        <span class="im-password-icon" data-icon-visible="hidden" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        </span>
+                                        <span class="im-password-icon d-none" data-icon-visible="shown" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M3 3l18 18" />
+                                                <path d="M10.6 10.7A3 3 0 0 0 13.3 13.4" />
+                                                <path d="M9.9 5.2A12.4 12.4 0 0 1 12 5c6.5 0 10 7 10 7a18.5 18.5 0 0 1-4.2 4.8" />
+                                                <path d="M6.2 6.2A18.3 18.3 0 0 0 2 12s3.5 7 10 7c1.8 0 3.4-.5 4.8-1.2" />
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mt-3">Entrar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

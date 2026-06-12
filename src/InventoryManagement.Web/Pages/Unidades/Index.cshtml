@@ -1,0 +1,111 @@
+@page
+@model InventoryManagement.Web.Pages.Unidades.IndexModel
+@{
+    ViewData["Title"] = "Unidades";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6 mb-1 im-page-title">Unidades de medida</h1>
+        <p class="text-muted mb-0">Listado de unidades de medida.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info" role="alert">
+        @Model.StatusMessage
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <strong>Listado</strong>
+        <span class="text-muted small" data-filter-count data-count-label="unidad(es)">@Model.UnitsOfMeasure.Count unidad(es)</span>
+    </div>
+    <div class="card-body">
+        @if (Model.UnitsOfMeasure.Count == 0)
+        {
+            <p class="text-muted mb-0">No hay unidades de medida para mostrar.</p>
+        }
+        else
+        {
+            var statusFilters = Model.UnitsOfMeasure
+                .Select(unit => unit.Status)
+                .Where(status => !string.IsNullOrWhiteSpace(status))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(status => status)
+                .ToList();
+            <div data-filter-group>
+                <div class="im-filter-panel mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Buscar</label>
+                            <input type="text" class="form-control" placeholder="Código, nombre o estatus..." data-search-input />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Filtrar por estatus</label>
+                            <div class="dropdown im-check-combo" data-filter-target="status" data-filter-placeholder="Todos los estatus" data-bs-auto-close="outside">
+                                <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="im-check-combo-label" data-filter-button-label>Todos los estatus</span>
+                                </button>
+                                <div class="dropdown-menu w-100 p-2 im-check-combo-menu">
+                                    @foreach (var status in statusFilters)
+                                    {
+                                        <label class="dropdown-item-text im-check-option">
+                                            <input class="form-check-input" type="checkbox" value="@status" data-label="@status" />
+                                            <span>@status</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                            <small class="im-filter-help">Puedes seleccionar varios estatus.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 row-cols-xxl-5 g-3">
+                    @foreach (var unit in Model.UnitsOfMeasure)
+                    {
+                        var isActive = string.Equals(unit.Status, "Activo", StringComparison.OrdinalIgnoreCase);
+                        <div class="col" data-filter-card data-status="@unit.Status" data-search="@($"{unit.Code} {unit.Name} {unit.Status}")">
+                            <div class="card h-100 im-card im-card--compact">
+                                <div class="card-body im-card-body">
+                                    <div class="d-flex justify-content-between align-items-start gap-2 im-master-card-top">
+                                        <div class="im-master-card-main">
+                                            <h2 class="h6 mb-1 im-title">
+                                                <span class="im-title-icon" aria-hidden="true">
+                                                    <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M1.5 10.5A1.5 1.5 0 0 1 3 9h10a1 1 0 1 0 0-2H3a1 1 0 1 0 0-2h6.5a1.5 1.5 0 0 0 0-3H3a1 1 0 1 0 0 2h6.5a.5.5 0 0 1 0 1H3a3 3 0 0 0 0 6h10a.5.5 0 0 1 0 1H3a1 1 0 1 0 0 2h10a2.5 2.5 0 0 0 0-5H3a.5.5 0 0 1-.5-.5z"/>
+                                                    </svg>
+                                                </span>
+                                                <span>@unit.Code</span>
+                                            </h2>
+                                            <div class="text-muted small">@unit.Name</div>
+                                        </div>
+                                        <div class="im-master-card-actions">
+                                            <span class="badge rounded-pill im-status-badge @(isActive ? "im-status-badge--active" : "im-status-badge--inactive")" data-status-badge>@(isActive ? "Activo" : "Inactivo")</span>
+                                        </div>
+                                    </div>
+                                    <div class="im-status-control">
+                                        <button type="button"
+                                                class="im-status-switch @(isActive ? "is-active" : "is-inactive")"
+                                                data-status-switch
+                                                aria-label="Cambiar estado simulado de la unidad"
+                                                aria-pressed="@(isActive.ToString().ToLowerInvariant())">
+                                            <span class="im-status-switch__thumb" aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-none text-muted text-center py-4" data-empty-message>
+                    No hay unidades que coincidan con los filtros aplicados.
+                </div>
+            </div>
+        }
+    </div>
+</div>

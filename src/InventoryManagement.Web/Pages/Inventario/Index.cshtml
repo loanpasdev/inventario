@@ -1,0 +1,185 @@
+@page
+@model InventoryManagement.Web.Pages.Inventario.IndexModel
+@{
+    ViewData["Title"] = "Inventario";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6 mb-1 im-page-title">Inventario</h1>
+        <p class="text-muted mb-0">Productos por debajo del stock mínimo.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info" role="alert">
+        @Model.StatusMessage
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <strong>Stock bajo</strong>
+        <span class="text-muted small" data-filter-count data-count-label="producto(s)">@Model.LowStockProducts.Count producto(s)</span>
+    </div>
+    <div class="card-body">
+        @if (Model.LowStockProducts.Count == 0)
+        {
+            <p class="text-muted mb-0">No hay productos con stock bajo.</p>
+        }
+        else
+        {
+            var categoryFilters = Model.LowStockProducts
+                .Select(product => product.Category)
+                .Where(category => !string.IsNullOrWhiteSpace(category))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(category => category)
+                .ToList();
+            var statusFilters = Model.LowStockProducts
+                .Select(product => product.Status)
+                .Where(status => !string.IsNullOrWhiteSpace(status))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(status => status)
+                .ToList();
+            <div data-filter-group>
+                <div class="im-filter-panel mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Buscar</label>
+                            <input type="text" class="form-control" placeholder="Nombre, código, categoría, unidad o moneda..." data-search-input />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Filtrar por categoría</label>
+                            <div class="dropdown im-check-combo" data-filter-target="category" data-filter-placeholder="Todas las categorías" data-bs-auto-close="outside">
+                                <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="im-check-combo-label" data-filter-button-label>Todas las categorías</span>
+                                </button>
+                                <div class="dropdown-menu w-100 p-2 im-check-combo-menu">
+                                    @foreach (var category in categoryFilters)
+                                    {
+                                        <label class="dropdown-item-text im-check-option">
+                                            <input class="form-check-input" type="checkbox" value="@category" data-label="@category" />
+                                            <span>@category</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                            <small class="im-filter-help">Puedes seleccionar varias categorías.</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Filtrar por estatus</label>
+                            <div class="dropdown im-check-combo" data-filter-target="status" data-filter-placeholder="Todos los estatus" data-bs-auto-close="outside">
+                                <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="im-check-combo-label" data-filter-button-label>Todos los estatus</span>
+                                </button>
+                                <div class="dropdown-menu w-100 p-2 im-check-combo-menu">
+                                    @foreach (var status in statusFilters)
+                                    {
+                                        <label class="dropdown-item-text im-check-option">
+                                            <input class="form-check-input" type="checkbox" value="@status" data-label="@status" />
+                                            <span>@status</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                            <small class="im-filter-help">Puedes seleccionar varios estatus.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+                    @foreach (var product in Model.LowStockProducts)
+                    {
+                        var statusBadgeClass = string.Equals(product.Status, "Activo", StringComparison.OrdinalIgnoreCase)
+                            ? "bg-success-subtle text-success border border-success-subtle"
+                            : "bg-secondary-subtle text-secondary border border-secondary-subtle";
+                        var saleEquivalent = string.Equals(product.CurrencyCode, "USD", StringComparison.OrdinalIgnoreCase)
+                            ? $"Eq. Bs. {product.SalePriceVes:N2}"
+                            : $"Eq. USD {product.SalePriceUsd:N2}";
+                        var purchaseEquivalent = string.Equals(product.CurrencyCode, "USD", StringComparison.OrdinalIgnoreCase)
+                            ? $"Eq. Bs. {product.PurchasePriceVes:N2}"
+                            : $"Eq. USD {product.PurchasePriceUsd:N2}";
+
+                        <div class="col" data-filter-card data-category="@product.Category" data-status="@product.Status" data-search="@($"{product.Name} {product.Barcode} {product.Category} {product.UnitOfMeasureCode} {product.UnitOfMeasureName} {product.CurrencyCode} {product.Status}")">
+                            <div class="card h-100 im-card im-card--tall">
+                                <div class="card-body im-card-body">
+                                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2 im-card-header">
+                                        <div>
+                                            <h2 class="h5 mb-1 im-title">
+                                                <span class="im-title-icon" aria-hidden="true">
+                                                    <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M8.21.5a.5.5 0 0 0-.42 0l-6 3a.5.5 0 0 0-.29.45v8a.5.5 0 0 0 .29.45l6 3a.5.5 0 0 0 .42 0l6-3a.5.5 0 0 0 .29-.45v-8a.5.5 0 0 0-.29-.45l-6-3zM8 1.5 13.5 4 8 6.5 2.5 4 8 1.5zM2 4.8l5.5 2.75v6.95L2 11.8V4.8zm6.5 9.7V7.55L14 4.8v7l-5.5 2.7z"/>
+                                                    </svg>
+                                                </span>
+                                                <span>@product.Name</span>
+                                            </h2>
+                                            <div class="im-card-category-row">
+                                                <span class="im-card-category-tag">@product.Category</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column align-items-end gap-2">
+                                            <span class="badge rounded-pill @statusBadgeClass">@product.Status</span>
+                                            <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle">Stock bajo</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="im-card-info-block">
+                                        <div class="im-card-code-line">
+                                            <span class="im-card-code-label">Código:</span>
+                                            <span class="text-muted small im-card-code-value">@product.Barcode</span>
+                                        </div>
+                                    </div>
+                                    <div class="im-barcode-wrap">
+                                        <svg class="im-barcode" data-barcode="@product.Barcode" role="img" aria-label="Código de barra"></svg>
+                                    </div>
+                                    <div class="im-card-meta im-card-meta--details mt-1">
+                                        <div class="text-muted small im-card-meta__item">Unidad: @product.UnitOfMeasureCode - @product.UnitOfMeasureName</div>
+                                        <div class="text-muted small im-card-meta__item im-card-meta__item--end">Moneda base: @product.CurrencyCode</div>
+                                    </div>
+
+                                    <div class="row g-2 im-stats">
+                                        <div class="col-12">
+                                            <div class="im-stat im-stat--price rounded d-flex justify-content-between">
+                                                <span class="text-muted">Venta</span>
+                                                <span class="d-inline-flex align-items-baseline gap-3">
+                                                    <strong>VES @product.SalePriceVes.ToString("N2")</strong>
+                                                    <span class="text-muted small" data-bs-toggle="tooltip" data-bs-placement="top" title="Tasa: 1 USD = VES @product.UsdToVesRate.ToString("N2")">USD @product.SalePriceUsd.ToString("N2")</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="im-stat rounded border d-flex justify-content-between">
+                                                <span class="text-muted">Compra</span>
+                                                <span class="d-inline-flex align-items-baseline gap-3">
+                                                    <strong>VES @product.PurchasePriceVes.ToString("N2")</strong>
+                                                    <span class="text-muted small" data-bs-toggle="tooltip" data-bs-placement="top" title="Tasa: 1 USD = VES @product.UsdToVesRate.ToString("N2")">USD @product.PurchasePriceUsd.ToString("N2")</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="im-stat rounded border d-flex justify-content-between">
+                                                <span class="text-muted">Stock</span>
+                                                <strong>@product.Stock</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="im-stat rounded border d-flex justify-content-between">
+                                                <span class="text-muted">Mínimo</span>
+                                                <strong>@product.MinimumStock</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="alert alert-light border mt-3 d-none" data-empty-message>
+                    No hay productos de inventario con los filtros seleccionados.
+                </div>
+            </div>
+        }
+    </div>
+</div>
