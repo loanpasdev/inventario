@@ -13,8 +13,9 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {
-    <div class="alert alert-info" role="alert">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
         @Model.StatusMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
     </div>
 }
 
@@ -87,15 +88,16 @@
                                             <span class="badge rounded-pill im-status-badge @(isActive ? "im-status-badge--active" : "im-status-badge--inactive")" data-status-badge>@(isActive ? "Activo" : "Inactivo")</span>
                                         </div>
                                     </div>
-                                    <div class="im-status-control">
-                                        <button type="button"
+                                    <form method="post" asp-page-handler="ToggleStatus" class="im-status-control">
+                                        <input type="hidden" name="id" value="@unit.Id" />
+                                        <input type="hidden" name="currentStatus" value="@unit.Status" />
+                                        <button type="submit"
                                                 class="im-status-switch @(isActive ? "is-active" : "is-inactive")"
-                                                data-status-switch
-                                                aria-label="Cambiar estado simulado de la unidad"
+                                                aria-label="Cambiar estado de la unidad de medida"
                                                 aria-pressed="@(isActive.ToString().ToLowerInvariant())">
                                             <span class="im-status-switch__thumb" aria-hidden="true"></span>
                                         </button>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>

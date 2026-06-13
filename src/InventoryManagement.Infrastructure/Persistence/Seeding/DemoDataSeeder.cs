@@ -49,7 +49,7 @@ public static class DemoDataSeeder
 
         await context.SaveChangesAsync(cancellationToken);
 
-        var desiredUsdToVesRate = 572.6800m;
+        var desiredUsdToVesRate = 587.4059m;
         var activeRate = await context.ExchangeRates
             .OrderByDescending(rate => rate.UpdatedAtUtc)
             .ThenByDescending(rate => rate.Id)

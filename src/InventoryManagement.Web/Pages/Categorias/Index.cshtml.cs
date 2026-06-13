@@ -33,6 +33,44 @@ public sealed class IndexModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnPostToggleStatusAsync(int id, string currentStatus)
+    {
+        if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString(SessionKeys.AccessToken)))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        var nextStatus = string.Equals(currentStatus, "Activo", StringComparison.OrdinalIgnoreCase)
+            ? "Inactivo"
+            : "Activo";
+        var client = _httpClientFactory.CreateClient("InventoryApi");
+
+        try
+        {
+            if (!AttachBearerToken(client))
+            {
+                StatusMessage = "Tu sesión expiró. Vuelve a iniciar sesión.";
+                return RedirectToPage("/Login");
+            }
+
+            var response = await client.PutAsJsonAsync($"api/categories/{id}/status", new { Status = nextStatus });
+            if (response.IsSuccessStatusCode)
+            {
+                StatusMessage = "Estado de la categoría actualizado correctamente.";
+                return RedirectToPage();
+            }
+
+            StatusMessage = $"No fue posible actualizar la categoría. La API respondió con estado {(int)response.StatusCode}.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No fue posible actualizar el estado de la categoría.");
+            StatusMessage = "No fue posible actualizar la categoría.";
+        }
+
+        return RedirectToPage();
+    }
+
     private async Task<IReadOnlyList<CategoryListItemViewModel>> LoadCategoriesAsync()
     {
         var client = _httpClientFactory.CreateClient("InventoryApi");

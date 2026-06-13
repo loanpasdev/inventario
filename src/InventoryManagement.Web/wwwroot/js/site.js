@@ -234,6 +234,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  document.querySelectorAll(".alert.alert-dismissible").forEach(function (alert) {
+    setTimeout(function () {
+      var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+      bsAlert.close();
+    }, 5000);
+  });
+
   document.querySelectorAll("[data-status-switch]").forEach(function (toggle) {
     var card = toggle.closest(".card-body");
     var badge = card ? card.querySelector("[data-status-badge]") : null;

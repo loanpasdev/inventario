@@ -33,6 +33,44 @@ public sealed class IndexModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnPostToggleStatusAsync(int id, string currentStatus)
+    {
+        if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString(SessionKeys.AccessToken)))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        var nextStatus = string.Equals(currentStatus, "Activo", StringComparison.OrdinalIgnoreCase)
+            ? "Inactivo"
+            : "Activo";
+        var client = _httpClientFactory.CreateClient("InventoryApi");
+
+        try
+        {
+            if (!AttachBearerToken(client))
+            {
+                StatusMessage = "Tu sesión expiró. Vuelve a iniciar sesión.";
+                return RedirectToPage("/Login");
+            }
+
+            var response = await client.PutAsJsonAsync($"api/units-of-measure/{id}/status", new { Status = nextStatus });
+            if (response.IsSuccessStatusCode)
+            {
+                StatusMessage = "Estado de la unidad actualizado correctamente.";
+                return RedirectToPage();
+            }
+
+            StatusMessage = $"No fue posible actualizar la unidad. La API respondió con estado {(int)response.StatusCode}.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No fue posible actualizar el estado de la unidad.");
+            StatusMessage = "No fue posible actualizar la unidad.";
+        }
+
+        return RedirectToPage();
+    }
+
     private async Task<IReadOnlyList<UnitOfMeasureListItemViewModel>> LoadUnitsOfMeasureAsync()
     {
         var client = _httpClientFactory.CreateClient("InventoryApi");

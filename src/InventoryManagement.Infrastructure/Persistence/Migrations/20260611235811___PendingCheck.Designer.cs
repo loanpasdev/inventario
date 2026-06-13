@@ -148,7 +148,7 @@ namespace InventoryManagement.Infrastructure.Persistence.Migrations
                             Id = 1,
                             IsActive = true,
                             UpdatedAtUtc = new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            UsdToVesRate = 572.6800m
+                            UsdToVesRate = 587.4059m
                         });
                 });
 

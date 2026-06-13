@@ -24,6 +24,7 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IProductCommandRepository, ProductCommandRepository>();
+        services.AddScoped<IMasterStatusRepository, MasterStatusRepository>();
         services.AddScoped<IProductQueries, ProductQueries>();
         services.AddScoped<ICategoryQueries, CategoryQueries>();
         services.AddScoped<IUnitOfMeasureQueries, UnitOfMeasureQueries>();

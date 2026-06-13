@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -17,7 +17,7 @@ namespace InventoryManagement.Infrastructure.Persistence.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 column: "UsdToVesRate",
-                value: 572.6800m);
+                value: 587.4059m);
         }
 
         /// <inheritdoc />
@@ -28,7 +28,7 @@ namespace InventoryManagement.Infrastructure.Persistence.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 column: "UsdToVesRate",
-                value: 36.5000m);
+                value: 572.6800m);
         }
     }
 }
