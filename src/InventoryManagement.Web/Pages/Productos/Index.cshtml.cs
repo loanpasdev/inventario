@@ -38,6 +38,9 @@ public sealed class IndexModel : PageModel
     [BindProperty]
     public CreateProductInputModel Input { get; set; } = new();
 
+    [BindProperty]
+    public UpdateProductInputModel UpdateInput { get; set; } = new();
+
     [TempData]
     public string? StatusMessage { get; set; }
 
@@ -88,6 +91,86 @@ public sealed class IndexModel : PageModel
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "No fue posible registrar el producto usando la API.");
+            StatusMessage = "No fue posible conectar con la API.";
+        }
+
+        await LoadPageDataAsync();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostToggleStatusAsync(int id, string currentStatus)
+    {
+        if (!IsAuthenticated())
+        {
+            return RedirectToPage("/Login");
+        }
+
+        var nextStatus = string.Equals(currentStatus, "Activo", StringComparison.OrdinalIgnoreCase)
+            ? "Inactivo"
+            : "Activo";
+        var client = _httpClientFactory.CreateClient("InventoryApi");
+
+        try
+        {
+            if (!AttachBearerToken(client))
+            {
+                StatusMessage = "Tu sesión expiró. Vuelve a iniciar sesión.";
+                return RedirectToPage("/Login");
+            }
+
+            var response = await client.PutAsJsonAsync($"api/products/{id}/status", new { Status = nextStatus });
+            if (response.IsSuccessStatusCode)
+            {
+                StatusMessage = "Estado del producto actualizado correctamente.";
+                return RedirectToPage();
+            }
+
+            StatusMessage = $"No fue posible actualizar el producto. La API respondió con estado {(int)response.StatusCode}.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No fue posible actualizar el estado del producto.");
+            StatusMessage = "No fue posible actualizar el producto.";
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostUpdateAsync()
+    {
+        if (!IsAuthenticated())
+        {
+            return RedirectToPage("/Login");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await LoadPageDataAsync();
+            return Page();
+        }
+
+        var client = _httpClientFactory.CreateClient("InventoryApi");
+
+        try
+        {
+            if (!AttachBearerToken(client))
+            {
+                StatusMessage = "Tu sesión expiró. Vuelve a iniciar sesión.";
+                return RedirectToPage("/Login");
+            }
+
+            var response = await client.PutAsJsonAsync($"api/products/{UpdateInput.Id}", UpdateInput);
+            if (response.IsSuccessStatusCode)
+            {
+                StatusMessage = "Producto actualizado correctamente.";
+                return RedirectToPage();
+            }
+
+            StatusMessage = $"La API respondió con estado {(int)response.StatusCode}.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No fue posible actualizar el producto usando la API.");
             StatusMessage = "No fue posible conectar con la API.";
         }
 

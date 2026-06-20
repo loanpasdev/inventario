@@ -212,6 +212,39 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="im-card-actions">
+                                        <form method="post" asp-page-handler="ToggleStatus" class="im-status-control">
+                                            <input type="hidden" name="id" value="@product.Id" />
+                                            <input type="hidden" name="currentStatus" value="@product.Status" />
+                                            <button type="submit"
+                                                    class="im-status-switch @(string.Equals(product.Status, "Activo", StringComparison.OrdinalIgnoreCase) ? "is-active" : "is-inactive")"
+                                                    aria-label="Cambiar estado del producto"
+                                                    aria-pressed="@(string.Equals(product.Status, "Activo", StringComparison.OrdinalIgnoreCase).ToString().ToLowerInvariant())">
+                                                <span class="im-status-switch__thumb" aria-hidden="true"></span>
+                                            </button>
+                                        </form>
+                                        <button type="button"
+                                                class="im-icon-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editProductModal"
+                                                data-product-id="@product.Id"
+                                                data-product-name="@product.Name"
+                                                data-product-barcode="@product.Barcode"
+                                                data-product-description="@product.Description"
+                                                data-product-currencycode="@product.CurrencyCode"
+                                                data-product-purchaseprice="@product.PurchasePrice"
+                                                data-product-saleprice="@product.SalePrice"
+                                                data-product-stock="@product.Stock"
+                                                data-product-minimumstock="@product.MinimumStock"
+                                                data-product-category="@product.Category"
+                                                data-product-unit="@product.UnitOfMeasureCode"
+                                                aria-label="Editar producto">
+                                            <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -314,7 +347,151 @@
     </div>
 </div>
 
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="editProductModalLabel">Editar producto</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="post" asp-page-handler="Update">
+                <div class="modal-body">
+                    <input type="hidden" asp-for="UpdateInput.Id" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="UpdateInput.Name" class="form-label"></label>
+                            <input asp-for="UpdateInput.Name" class="form-control" id="edit-name" />
+                            <span asp-validation-for="UpdateInput.Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UpdateInput.Barcode" class="form-label"></label>
+                            <input asp-for="UpdateInput.Barcode" class="form-control" id="edit-barcode" maxlength="20" inputmode="numeric" />
+                            <span asp-validation-for="UpdateInput.Barcode" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UpdateInput.CategoryId" class="form-label"></label>
+                            <select asp-for="UpdateInput.CategoryId" asp-items="Model.CategoryOptions" class="form-select" id="edit-categoryId">
+                                <option value="">Seleccione una categoria</option>
+                            </select>
+                            <span asp-validation-for="UpdateInput.CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UpdateInput.UnitOfMeasureId" class="form-label"></label>
+                            <select asp-for="UpdateInput.UnitOfMeasureId" asp-items="Model.UnitOfMeasureOptions" class="form-select" id="edit-unitOfMeasureId">
+                                <option value="">Seleccione una unidad</option>
+                            </select>
+                            <span asp-validation-for="UpdateInput.UnitOfMeasureId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="UpdateInput.CurrencyCode" class="form-label"></label>
+                            <select asp-for="UpdateInput.CurrencyCode" asp-items="Model.CurrencyOptions" class="form-select" id="edit-currencyCode">
+                                <option value="">Seleccione una moneda</option>
+                            </select>
+                            <span asp-validation-for="UpdateInput.CurrencyCode" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="UpdateInput.Description" class="form-label"></label>
+                            <textarea asp-for="UpdateInput.Description" class="form-control" id="edit-description" rows="3"></textarea>
+                            <span asp-validation-for="UpdateInput.Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UpdateInput.PurchasePrice" class="form-label"></label>
+                            <input asp-for="UpdateInput.PurchasePrice" class="form-control" id="edit-purchasePrice" />
+                            <span asp-validation-for="UpdateInput.PurchasePrice" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UpdateInput.SalePrice" class="form-label"></label>
+                            <input asp-for="UpdateInput.SalePrice" class="form-control" id="edit-salePrice" />
+                            <span asp-validation-for="UpdateInput.SalePrice" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UpdateInput.Stock" class="form-label"></label>
+                            <input asp-for="UpdateInput.Stock" class="form-control" id="edit-stock" />
+                            <span asp-validation-for="UpdateInput.Stock" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UpdateInput.MinimumStock" class="form-label"></label>
+                            <input asp-for="UpdateInput.MinimumStock" class="form-control" id="edit-minimumStock" />
+                            <span asp-validation-for="UpdateInput.MinimumStock" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var categoryMap = {};
+            @foreach (var cat in Model.Categories)
+            {
+                <text>categoryMap["@cat.Name"] = @cat.Id;</text>
+            }
+
+            var unitMap = {};
+            @foreach (var unit in Model.UnitsOfMeasure)
+            {
+                <text>unitMap["@unit.Code"] = @unit.Id;</text>
+            }
+
+            var editModal = document.getElementById("editProductModal");
+            if (editModal) {
+                editModal.addEventListener("show.bs.modal", function (event) {
+                    var button = event.relatedTarget;
+                    if (!button) return;
+
+                    var id = button.getAttribute("data-product-id");
+                    var name = button.getAttribute("data-product-name");
+                    var barcode = button.getAttribute("data-product-barcode");
+                    var description = button.getAttribute("data-product-description");
+                    var currencyCode = button.getAttribute("data-product-currencycode");
+                    var purchasePrice = button.getAttribute("data-product-purchaseprice");
+                    var salePrice = button.getAttribute("data-product-saleprice");
+                    var stock = button.getAttribute("data-product-stock");
+                    var minimumStock = button.getAttribute("data-product-minimumstock");
+                    var categoryName = button.getAttribute("data-product-category");
+                    var unitCode = button.getAttribute("data-product-unit");
+
+                    document.getElementById("edit-name").value = name || "";
+                    document.getElementById("edit-barcode").value = barcode || "";
+                    document.getElementById("edit-description").value = description || "";
+                    document.getElementById("edit-purchasePrice").value = purchasePrice || "";
+                    document.getElementById("edit-salePrice").value = salePrice || "";
+                    document.getElementById("edit-stock").value = stock || "";
+                    document.getElementById("edit-minimumStock").value = minimumStock || "";
+
+                    var categoryId = categoryMap[categoryName] || "";
+                    document.getElementById("edit-categoryId").value = categoryId;
+
+                    var unitId = unitMap[unitCode] || "";
+                    document.getElementById("edit-unitOfMeasureId").value = unitId;
+
+                    var currencySelect = document.getElementById("edit-currencyCode");
+                    if (currencySelect) {
+                        currencySelect.value = currencyCode || "";
+                    }
+                });
+            }
+        })();
+    </script>
 }
 

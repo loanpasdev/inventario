@@ -18,6 +18,11 @@ public sealed class ProductCommandRepository : IProductCommandRepository
         return _context.Products.AddAsync(product, cancellationToken).AsTask();
     }
 
+    public Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return _context.Products.SingleOrDefaultAsync(product => product.Id == id, cancellationToken);
+    }
+
     public Task<bool> CategoryExistsAsync(int categoryId, CancellationToken cancellationToken)
     {
         return _context.Categories.AnyAsync(category => category.Id == categoryId, cancellationToken);
